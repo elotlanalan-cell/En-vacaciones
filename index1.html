@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Quieres salir a pasear?</title>
+<style>
+  :root {
+    --pink: #ff6f91;
+    --pink-dark: #e85a7a;
+    --bg1: #fff5f7;
+    --bg2: #ffe0ec;
+    --text: #4a2c3a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    overflow-x: hidden;
+    position: relative;
+    text-align: center;
+    padding: 30px 20px;
+  }
+
+  h1 {
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    color: var(--text);
+    margin-bottom: 10px;
+    z-index: 2;
+  }
+
+  p.sub {
+    color: #8a6273;
+    margin-bottom: 30px;
+    font-size: 1.05rem;
+    z-index: 2;
+  }
+
+  .step {
+    z-index: 2;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .hidden { display: none !important; }
+
+  /* --- Step 1: yes/no --- */
+  .buttons {
+    position: relative;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+  }
+
+  button {
+    border: none;
+    border-radius: 50px;
+    padding: 16px 36px;
+    font-size: 1.05rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    font-family: inherit;
+  }
+
+  #yesBtn {
+    background: var(--pink);
+    color: white;
+    box-shadow: 0 6px 16px rgba(255, 111, 145, 0.4);
+  }
+  #yesBtn:hover { transform: scale(1.08); }
+
+  #noBtn {
+    background: #fff;
+    color: var(--pink);
+    border: 2px solid var(--pink);
+    position: relative;
+  }
+
+  /* --- Step 2: activity cards --- */
+  .activities {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .activity-card {
+    background: white;
+    border: 2px solid #ffd3e0;
+    border-radius: 16px;
+    padding: 18px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .activity-card:hover {
+    border-color: var(--pink);
+    transform: translateY(-3px);
+  }
+
+  .activity-card.selected {
+    border-color: var(--pink);
+    background: #fff0f5;
+    box-shadow: 0 4px 14px rgba(255, 111, 145, 0.35);
+  }
+
+  .activity-card .icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .activity-card .label {
+    font-size: 0.95rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .custom-activity {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid #ffd3e0;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    font-family: inherit;
+    text-align: center;
+  }
+  .custom-activity:focus {
+    outline: none;
+    border-color: var(--pink);
+  }
+
+  /* --- Step 3: date/time --- */
+  .field {
+    text-align: left;
+    margin-bottom: 18px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.9rem;
+    color: #8a6273;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid #ffd3e0;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--text);
+    background: white;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--pink);
+  }
+
+  .primary-btn {
+    background: var(--pink);
+    color: white;
+    width: 100%;
+    box-shadow: 0 6px 16px rgba(255, 111, 145, 0.4);
+    margin-top: 6px;
+  }
+  .primary-btn:hover { background: var(--pink-dark); }
+  .primary-btn:disabled {
+    background: #f3c3d1;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 14px;
+    color: #b07a8c;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* --- Final summary --- */
+  #result {
+    font-size: 1.15rem;
+    color: var(--text);
+    z-index: 2;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: 18px;
+    padding: 24px;
+    margin-top: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    text-align: left;
+  }
+
+  .summary-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+
+  .summary-row .icon { font-size: 1.2rem; }
+
+  .emoji {
+    font-size: 2.6rem;
+    margin-top: 14px;
+    text-align: center;
+  }
+
+  /* Leaves floating in the background */
+  .leaf {
+    position: absolute;
+    top: -40px;
+    font-size: 1.6rem;
+    opacity: 0.6;
+    animation: fall linear infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+  <h1 id="question">¿Quieres salir a pasear conmigo? 🌳</h1>
+  <p class="sub" id="subtext">Solo tienes que decir que sí... o intentarlo 😏</p>
+
+  <!-- STEP 1 -->
+  <div class="step" id="step1">
+    <div class="buttons" id="buttonRow">
+      <button id="yesBtn">¡Sí, vamos! 🐾</button>
+      <button id="noBtn">No, gracias</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: choose activity -->
+  <div class="step hidden" id="step2">
+    <div class="activities" id="activityGrid">
+      <div class="activity-card" data-activity="Ir a comer sushi 🍣">
+        <span class="icon">🍣</span>
+        <span class="label">Ir a comer sushi</span>
+      </div>
+      <div class="activity-card" data-activity="Ir a una biblioteca 📚">
+        <span class="icon">📚</span>
+        <span class="label">Ir a una biblioteca</span>
+      </div>
+      <div class="activity-card" data-activity="Ir a un museo 🖼️">
+        <span class="icon">🖼️</span>
+        <span class="label">Ir a un museo</span>
+      </div>
+      <div class="activity-card" data-activity="Ir a un acuario 🐠">
+        <span class="icon">🐠</span>
+        <span class="label">Ir a un acuario</span>
+      </div>
+      <div class="activity-card" data-activity="Ir a una cafetería de gatos 🐱">
+        <span class="icon">🐱</span>
+        <span class="label">Cafetería de gatos</span>
+      </div>
+    </div>
+    <div class="field" style="margin-top:16px;">
+      <label for="placeInput">📍 ¿Tienes algún lugar en mente? (opcional)</label>
+      <input type="text" id="placeInput" placeholder="Ej: el centro, cerca de mi casa...">
+    </div>
+    <button class="primary-btn" id="toStep3Btn" disabled>Siguiente →</button>
+    <div><span class="back-link" id="backTo1">← Volver</span></div>
+  </div>
+
+  <!-- STEP 3: date/time -->
+  <div class="step hidden" id="step3">
+    <div class="field">
+      <label for="dateInput">📅 Elige el día</label>
+      <input type="date" id="dateInput">
+    </div>
+    <div class="field">
+      <label for="timeInput">🕒 Elige la hora</label>
+      <input type="time" id="timeInput">
+    </div>
+    <button class="primary-btn" id="confirmBtn" disabled>Confirmar plan 🎉</button>
+    <div><span class="back-link" id="backTo2">← Volver</span></div>
+  </div>
+
+  <!-- FINAL -->
+  <div class="step hidden" id="resultStep">
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const question = document.getElementById('question');
+    const subtext = document.getElementById('subtext');
+
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const resultStep = document.getElementById('resultStep');
+
+    const activityGrid = document.getElementById('activityGrid');
+    const toStep3Btn = document.getElementById('toStep3Btn');
+    const backTo1 = document.getElementById('backTo1');
+
+    const dateInput = document.getElementById('dateInput');
+    const timeInput = document.getElementById('timeInput');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const backTo2 = document.getElementById('backTo2');
+
+    const result = document.getElementById('result');
+
+    let selectedActivity = null;
+
+    // ----- Step 1: el botón "No" se escapa -----
+    let noClicks = 0;
+    const noMessages = ["No, gracias", "¿Segura/o? 🥺", "¡Vamos, será divertido!", "Última oportunidad...", "No puedes hacer click aquí 😂"];
+
+    function moveNoButton() {
+      const btnWidth = noBtn.offsetWidth;
+      const btnHeight = noBtn.offsetHeight;
+      const maxX = window.innerWidth - btnWidth - 20;
+      const maxY = window.innerHeight - btnHeight - 20;
+      const randomX = Math.random() * maxX;
+      const randomY = Math.random() * maxY;
+      noBtn.style.position = 'fixed';
+      noBtn.style.left = randomX + 'px';
+      noBtn.style.top = randomY + 'px';
+    }
+
+    function dodgeNo() {
+      noClicks++;
+      moveNoButton();
+      if (noClicks < noMessages.length) noBtn.textContent = noMessages[noClicks];
+      const scale = 1 + noClicks * 0.15;
+      yesBtn.style.transform = `scale(${scale})`;
+    }
+
+    noBtn.addEventListener('mouseenter', dodgeNo);
+    noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); dodgeNo(); });
+
+    yesBtn.addEventListener('click', () => {
+      step1.classList.add('hidden');
+      step2.classList.remove('hidden');
+      question.textContent = '¡Genial! 🎉 ¿Qué te gustaría hacer?';
+      subtext.textContent = 'Elige una actividad';
+    });
+
+    // ----- Step 2: elegir actividad -----
+    activityGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.activity-card');
+      if (!card) return;
+      document.querySelectorAll('.activity-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedActivity = card.dataset.activity;
+      toStep3Btn.disabled = false;
+    });
+
+    document.getElementById('placeInput').addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      if (val) {
+        // Si escribe un lugar, quitar selección de tarjetas y usar el lugar como actividad
+        document.querySelectorAll('.activity-card').forEach(c => c.classList.remove('selected'));
+        selectedActivity = val;
+        toStep3Btn.disabled = false;
+      } else {
+        // Si borra el texto, volver a requerir que seleccione una tarjeta
+        selectedActivity = null;
+        toStep3Btn.disabled = true;
+      }
+    });
+
+    toStep3Btn.addEventListener('click', () => {
+      step2.classList.add('hidden');
+      step3.classList.remove('hidden');
+      question.textContent = 'Casi listo 📅';
+      subtext.textContent = 'Elige el día y la hora';
+
+      // No permitir fechas pasadas
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.min = today;
+    });
+
+    backTo1.addEventListener('click', () => {
+      step2.classList.add('hidden');
+      step1.classList.remove('hidden');
+      question.textContent = '¿Quieres salir a pasear conmigo? 🌳';
+      subtext.textContent = 'Solo tienes que decir que sí... o intentarlo 😏';
+    });
+
+    // ----- Step 3: fecha y hora -----
+    function checkDateTime() {
+      confirmBtn.disabled = !(dateInput.value && timeInput.value);
+    }
+    dateInput.addEventListener('change', checkDateTime);
+    timeInput.addEventListener('change', checkDateTime);
+
+    backTo2.addEventListener('click', () => {
+      step3.classList.add('hidden');
+      step2.classList.remove('hidden');
+      question.textContent = '¡Genial! 🎉 ¿Qué te gustaría hacer?';
+      subtext.textContent = 'Elige una actividad';
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      step3.classList.add('hidden');
+      resultStep.classList.remove('hidden');
+      question.textContent = '¡Plan confirmado! 🎉';
+      subtext.textContent = '';
+
+      const dateObj = new Date(dateInput.value + 'T' + timeInput.value);
+      const formattedDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const formattedTime = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+      const placeInput = document.getElementById('placeInput');
+      const lugar = placeInput.value.trim();
+      // Si hay tarjeta seleccionada Y también escribió lugar, se muestra como sugerencia
+      // Si solo escribió lugar, ese es la actividad
+      const actividadFinal = selectedActivity;
+      const lugarTexto = (lugar && selectedActivity !== lugar) ? `📍 Lugar sugerido: ${lugar}\n` : '';
+
+      const mensaje = `¡Hola! Confirmé el plan 🎉\n\n🎯 Actividad: ${actividadFinal}\n📅 Día: ${formattedDate}\n🕒 Hora: ${formattedTime}\n${lugarTexto}\n¡Nos vemos! 🌿`;
+      const waURL = `https://wa.me/525568650759?text=${encodeURIComponent(mensaje)}`;
+
+      result.innerHTML = `
+        <p>Sabía que dirías que sí 😄</p>
+        <div class="summary-card">
+          <div class="summary-row"><span class="icon">🎯</span><span><strong>Actividad:</strong> ${actividadFinal}</span></div>
+          <div class="summary-row"><span class="icon">📅</span><span><strong>Día:</strong> ${formattedDate}</span></div>
+          <div class="summary-row"><span class="icon">🕒</span><span><strong>Hora:</strong> ${formattedTime}</span></div>
+          ${(lugar && selectedActivity !== lugar) ? `<div class="summary-row"><span class="icon">📍</span><span><strong>Lugar:</strong> ${lugar}</span></div>` : ''}
+        </div>
+        <div style="margin-top:20px;">
+          <a href="${waURL}" target="_blank" style="
+            display:inline-block;
+            background:#25D366;
+            color:white;
+            text-decoration:none;
+            padding:14px 28px;
+            border-radius:50px;
+            font-weight:600;
+            font-size:1rem;
+            box-shadow:0 6px 16px rgba(37,211,102,0.4);
+          ">📲 Confirmar por WhatsApp</a>
+        </div>
+        <div class="emoji">🌿🐕🌞</div>
+      `;
+      createCharacters(15);
+    });
+
+    // ----- Personajes cayendo -----
+    // ----- Hojitas decorativas -----
+    function createCharacters(amount) {
+      const emojis = ['🍃', '🌿', '🍂', '☀️'];
+      for (let i = 0; i < amount; i++) {
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        leaf.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        leaf.style.left = Math.random() * 100 + 'vw';
+        leaf.style.animationDuration = (4 + Math.random() * 4) + 's';
+        leaf.style.animationDelay = (Math.random() * 2) + 's';
+        document.body.appendChild(leaf);
+      }
+    }
+    createCharacters(6);
+  </script>
+
+  <script data-goatcounter="https://itzila.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
